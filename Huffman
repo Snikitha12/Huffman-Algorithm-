@@ -1,0 +1,80 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+// Structure for each node in the Huffman tree
+struct HuffmanNode {
+    char data;
+    int frequency;
+    HuffmanNode* left;
+    HuffmanNode* right;
+
+    HuffmanNode(char d, int freq) : data(d), frequency(freq), left(nullptr), right(nullptr) {}
+};
+
+// Comparison function for priority queue
+struct CompareNodes {
+    bool operator()(HuffmanNode* a, HuffmanNode* b) {
+        return a->frequency > b->frequency;
+    }
+};
+
+// Function to build the Huffman tree
+HuffmanNode* buildHuffmanTree(vector<char>& data, vector<int>& frequency) {
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, CompareNodes> pq;
+
+    // Create initial nodes and push them into the priority queue
+    for (size_t i = 0; i < data.size(); ++i) {
+        pq.push(new HuffmanNode(data[i], frequency[i]));
+    }
+
+    // Build the Huffman tree
+    while (pq.size() > 1) {
+        HuffmanNode* left = pq.top();
+        pq.pop();
+
+        HuffmanNode* right = pq.top();
+        pq.pop();
+
+        HuffmanNode* newNode = new HuffmanNode('$', left->frequency + right->frequency);
+        newNode->left = left;
+        newNode->right = right;
+
+        pq.push(newNode);
+    }
+
+    return pq.top();
+}
+
+// Function to print Huffman codes in preorder traversal
+void printHuffmanCodes(HuffmanNode* root, string code, vector<string>& result) {
+    if (!root) {
+        return;
+    }
+
+    if (root->data != '$') {
+        result.push_back(code);
+        cout << root->data << ": " << code << endl;
+    }
+
+    printHuffmanCodes(root->left, code + "0", result);
+    printHuffmanCodes(root->right, code + "1", result);
+}
+
+int main() {
+    // Given input
+    vector<char> data = {'a', 'b', 'c', 'd', 'e', 'f'};
+    vector<int> frequency = {5, 9, 12, 13, 16, 45};
+
+    // Build Huffman tree
+    HuffmanNode* root = buildHuffmanTree(data, frequency);
+
+    // Print Huffman codes
+    vector<string> result;
+    printHuffmanCodes(root, "", result);
+
+    return 0;
+}
